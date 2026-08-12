@@ -34,8 +34,8 @@ title('Convolução entre A e B')
 %Função de Transferencia
 %H(Z) = Y(Z)/X(Z) = (1+1/2*z^-1)/(1 + 1/3*z^-1)
 
-den = [1 1/2]; %Denominador H(Z)
-num = [1 1/3]; %Numerador H(Z)
+num = [1 1/2]; %Numerador H(Z)
+den = [1 1/3]; %Denominador H(Z)
 
 %inp: numerador, denominador, quantas amostras serão simuladas
 %out: resposta ao impulso, vetor de amostras [0, 1, 2, ...]
