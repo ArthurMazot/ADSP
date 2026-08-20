@@ -59,3 +59,6 @@ xlabel('Frequência (Hz)')
 
 subplot(2,1,2)
 plot(f(1:floor(n/2)), angle(y(1:floor(n/2))))
+
+%% Parte 2)
+
