@@ -2,23 +2,23 @@ clc
 clear all
 close all
 
-[x, fa] = audioread('Bagatelle-no.-25-__FÃ¼r-Elise___-WoO-59.wav');
+[x, fa] = audioread('Bagatelle-no.-25-__Für-Elise___-WoO-59.wav');
 
 %% A)
 
-n = pow2(nextpow2(length(x(:,1)))); %Corrige para a prÃ³xima potencia de 2
+n = pow2(nextpow2(length(x(:,1)))); %Corrige para a próxima potencia de 2
 
 y = fft(x(:,1), n); %FFT de uma das faixas de audio
 f = (0:n-1)*(fa/n);
 p = y.*conj(y)/n;
 p = p./max(p);
 
-%Plot da mÃºsica no domÃ­nio frequÃªncia
+%Plot da música no domínio frequência
 figure(1)
 plot(f(1:floor(n/2)), p(1:floor(n/2)))
-xlabel('FrequÃªncia (Hz)')
+xlabel('Frequência (Hz)')
 
-%FrequÃªncia dos filtros
+%Frequência dos filtros
 %Passa-Baixas
 fpb = 2*500/fa;
 fsb = 2*1300/fa;
@@ -44,20 +44,24 @@ fpr2 = 2*8450/fa;
 %% B)
 
 %Passa-Baixas
-[hb, wb] = freqz(fir2(50,[0 fpb fsb 1], [1 1 0 0], hanning(51)));
+hb = fir2(120,[0 fpb fsb 1], [1 1 0 0], hanning(121));
+[hbf, wb] = freqz(hb);
 %Passa-Altas
-[ha, wa] = freqz(fir2(50,[0 fpa fsa 1], [0 0 1 1], hanning(51)));
+ha = fir2(100,[0 fpa fsa 1], [0 0 1 1], hanning(101));
+[haf, wa] = freqz(ha);
 %Passa-Banda
-[hp, wp] = freqz(fir2(50,[0 fsp1 fpp1 fpp2 fsp2 1], [0 0 1 1 0 0], hanning(51)));
+hp = fir2(110,[0 fsp1 fpp1 fpp2 fsp2 1], [0 0 1 1 0 0], hanning(111));
+[hpf, wp] = freqz(hp);
 %Rejeita-Banda
-[hr, wr] = freqz(fir2(50,[0 fpr1 fsr1 fsr2 fpr2 1], [1 1 0 0 1 1], hanning(51)));
+hr = fir2(206,[0 fpr1 fsr1 fsr2 fpr2 1], [1 1 0 0 1 1], hanning(207));
+[hrf, wr] = freqz(hr);
 
 figure(2)
 hold on
-plot(wb/pi,20*log10(abs(hb)), 'b')
-plot(wa/pi,20*log10(abs(ha)), 'r')
-plot(wp/pi,20*log10(abs(hp)), 'k')
-plot(wr/pi,20*log10(abs(hr)), 'g')
+plot(wb/pi,20*log10(abs(hbf)), 'b')
+plot(wa/pi,20*log10(abs(haf)), 'r')
+plot(wp/pi,20*log10(abs(hpf)), 'k')
+plot(wr/pi,20*log10(abs(hrf)), 'g')
 legend('Passa-Baixas', 'Passa-Altas', 'Passa-Banda', 'Rejeita-Banda')
 
 %% C)
@@ -67,9 +71,81 @@ y2 = filter(ha, 1, x(:,1));
 y3 = filter(hp, 1, x(:,1));
 y4 = filter(hr, 1, x(:,1));
 
-yt = y1 + y2 + y3 + y4;
-plot(yt)
+figure(3)
+hold on
+
+%Passa-Baixas
+y = fft(y1, n);
+f = (0:n-1)*(fa/n);
+p = y.*conj(y)/n;
+p = p./max(p);
+
+plot(f(1:floor(n/2)), p(1:floor(n/2)), 'b')
+
+%Passa-Altas
+y = fft(y2, n);
+f = (0:n-1)*(fa/n);
+p = y.*conj(y)/n;
+p = p./max(p);
+
+plot(f(1:floor(n/2)), p(1:floor(n/2)), 'r')
+
+%Passa-Banda
+y = fft(y3, n);
+f = (0:n-1)*(fa/n);
+p = y.*conj(y)/n;
+p = p./max(p);
+
+plot(f(1:floor(n/2)), p(1:floor(n/2)), 'k')
+
+%Rejeita-Banda
+y = fft(y4, n);
+f = (0:n-1)*(fa/n);
+p = y.*conj(y)/n;
+p = p./max(p);
+
+plot(f(1:floor(n/2)), p(1:floor(n/2)), 'g')
 
 %% D)
-G = [0 0 0 0];
+G = [1 1 1 1];
 yt = G(1)*y1 + G(2)*y2 + G(3)*y3 + G(4)*y4;
+
+%sound(yt)
+
+%% Gráfico de Atraso
+
+figure(4)
+subplot(2,2,1)
+grpdelay(hb, 1)
+title('Passa-Baixas')
+
+subplot(2,2,2)
+grpdelay(ha, 1)
+title('Passa-Altas')
+
+subplot(2,2,3)
+grpdelay(hp, 1)
+title('Passa-Banda')
+
+subplot(2,2,4)
+grpdelay(hr, 1)
+title('Rejeita-Banda')
+
+%% Pzmap dos filtros
+
+figure(5)
+subplot(2,2,1)
+zplane(hb, 1)
+title('Passa-Baixas')
+
+subplot(2,2,2)
+zplane(ha, 1)
+title('Passa-Altas')
+
+subplot(2,2,3)
+zplane(hp, 1)
+title('Passa-Banda')
+
+subplot(2,2,4)
+zplane(hr, 1)
+title('Rejeita-Banda')
