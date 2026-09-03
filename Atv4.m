@@ -20,40 +20,40 @@ xlabel('Frequência (Hz)')
 
 %Frequência dos filtros
 %Passa-Baixas
-fpb = 2*500/fa;
-fsb = 2*1300/fa;
+fpb = 2*200/fa;
+fsb = 2*400/fa;
 
 %Passa-Altas
-fpa = 2*9000/fa;
-fsa = 2*10000/fa;
+fpa = 2*1700/fa;
+fsa = 2*1900/fa;
 
-%Passa-Banda   (fpp1*fpps2 = fsp1*fsp2)
-fsp1 = 2*1600/fa;
-fpp1 = 2*2500/fa;
+%Passa-Banda   (fpp1*fpp2 = fsp1*fsp2)
+fsp1 = 2*400/fa;
+fpp1 = 2*600/fa;
 
-fpp2 = 2*4000/fa;
-fsp2 = 2*6250/fa;
+fpp2 = 2*800/fa;
+fsp2 = 2*1200/fa;
 
 %Rejeita-Banda (fpr1*fprs2 = fsr1*fsr2)
-fpr1 = 2*6000/fa;
-fsr1 = 2*6500/fa;
+fpr1 = 2*1300/fa;
+fsr1 = 2*1500/fa;
 
-fsr2 = 2*8000/fa;
-fpr2 = 2*8450/fa;
+fsr2 = 2*1700/fa;
+fpr2 = 2*1961/fa;
 
 %% B)
 
 %Passa-Baixas
-hb = fir2(120,[0 fpb fsb 1], [1 1 0 0], hanning(121));
+hb = fir2(450,[0 fpb fsb 1], [1 1 0 0], hanning(451));
 [hbf, wb] = freqz(hb);
 %Passa-Altas
-ha = fir2(100,[0 fpa fsa 1], [0 0 1 1], hanning(101));
+ha = fir2(450,[0 fpa fsa 1], [0 0 1 1], hanning(451));
 [haf, wa] = freqz(ha);
 %Passa-Banda
-hp = fir2(110,[0 fsp1 fpp1 fpp2 fsp2 1], [0 0 1 1 0 0], hanning(111));
+hp = fir2(450,[0 fsp1 fpp1 fpp2 fsp2 1], [0 0 1 1 0 0], hanning(451));
 [hpf, wp] = freqz(hp);
 %Rejeita-Banda
-hr = fir2(206,[0 fpr1 fsr1 fsr2 fpr2 1], [1 1 0 0 1 1], hanning(207));
+hr = fir2(450,[0 fpr1 fsr1 fsr2 fpr2 1], [1 1 0 0 1 1], hanning(451));
 [hrf, wr] = freqz(hr);
 
 figure(2)
@@ -110,7 +110,7 @@ plot(f(1:floor(n/2)), p(1:floor(n/2)), 'g')
 G = [1 1 1 1];
 yt = G(1)*y1 + G(2)*y2 + G(3)*y3 + G(4)*y4;
 
-%sound(yt)
+sound(yt)
 
 %% Gráfico de Atraso
 
