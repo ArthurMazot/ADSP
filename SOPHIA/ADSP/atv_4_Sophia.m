@@ -5,9 +5,9 @@ close all;
 [x, fa] = audioread('AURORA - Running With The Wolves.wav');
 
 %{
-a) Escolher as frequências dos filtros com base 
-no espectro de frequências do sinal de
-áudio escolhido;
+a) Escolher as frequencias dos filtros com base 
+no espectro de frequencias do sinal de
+Ã¡udio escolhido;
 %}
 
 n = pow2(nextpow2(length(x(:,1))));
@@ -21,16 +21,16 @@ p = p./max(p);
 figure(1)
 plot(f(1:floor(n/2)), p(1:floor(n/2)))
 xlim([0 fa/16])
-xlabel('Frequência (Hz)')
+xlabel('Frequencia (Hz)')
 ylabel('Magnitude normalizada')
-title('Espectro de frequências do áudio')
+title('Espectro de frequencias do audio')
 grid on
 
 %{
 fa = 44100
 famax = fa/2 = 22050
 
-Portanto a frequência dos filtros será:
+Portanto a frequencia dos filtros sera¡:
 %}
 
 %Passa-Baixas
@@ -57,8 +57,8 @@ brffs = 2*14450/fa;
 
 %{
 b) Projetar um sistema somente com filtros 
-do tipo FIR, e visualizar, em um único gráfico,
-suas respostas em frequência;
+do tipo FIR, e visualizar, em um unico grafico,
+suas respostas em frequencia;
 %}
 
 %Passa-Baixas
@@ -85,17 +85,11 @@ plot(wa/pi,20*log10(abs(haf)), 'r')
 plot(wp/pi,20*log10(abs(hpf)), 'g')
 plot(wr/pi,20*log10(abs(hrf)), 'k')
 
-xlabel('Frequência normalizada (\times\pi rad/amostra)')
+xlabel('Frequencia normalizada (\times\pi rad/amostra)')
 ylabel('Magnitude (dB)')
-title('Respostas em frequência dos filtros FIR')
+title('Respostas em frequencia dos filtros FIR')
 legend('Passa-Baixas','Passa-Altas','Passa-Banda','Rejeita-Banda')
 
-
-legTexts = findobj(lgd, 'Type', 'text');
-
-legTexts(1).Color = 'k'; 
-legTexts(2).Color = 'g';
-legTexts(3).Color = 'b'; 
 grid on
 
 
@@ -103,11 +97,82 @@ grid on
 c) Implementar cada sistema conforme diagrama da Figura 1;
 %}
 
+%Filtragem do sinal de áudio em cada filtro
+y1 = filter(hb, 1, x(:,1)); %Passa-Baixas
+y2 = filter(ha, 1, x(:,1)); %Passa-Altas
+y3 = filter(hp, 1, x(:,1)); %Passa-Banda
+y4 = filter(hr, 1, x(:,1)); %Rejeita-Banda
 
+figure(3)
+hold on
+
+Y = [y1 y2 y3 y4];
+cores = ['b' 'r' 'g' 'k'];
+
+for i = 1:4
+    y = fft(Y(:,i), n);
+    p = y.*conj(y)/n;
+    p = p./max(p);
+
+    plot(f(1:floor(n/2)), p(1:floor(n/2)), cores(i))
+end
+
+xlabel('Frequência (Hz)')
+ylabel('Magnitude normalizada')
+title('Espectro das saídas dos filtros FIR')
+legend('Passa-Baixas','Passa-Altas','Passa-Banda','Rejeita-Banda')
+xlim([0 18000])
+grid on
 
 %{
-d) Testar o funcionamento do sistema utilizando o arquivo de áudio
+d) Testar o funcionamento do sistema utilizando o arquivo de Ã¡udio
 escolhido;
-Testar saída de cada filtro individualmente alterando o valor dos ganhos
+Testar saÃ­da de cada filtro individualmente alterando o valor dos ganhos
 (G1, G2, G2 e G4), de "1" para "0" ou de "0" para "1".
 %}
+
+G = [1 1 1 1]; %Ganhos dos filtros
+yt = G(1)*y1 + G(2)*y2 + G(3)*y3 + G(4)*y4; %Soma das saídas dos filtros
+%sound(yt, fa) %Reproduz o áudio filtrado
+
+figure(4)
+
+subplot(2,2,1)
+grpdelay(hb, 1) 
+title('Passa-Baixas')
+
+subplot(2,2,2)
+grpdelay(ha, 1)
+title('Passa-Altas')
+
+subplot(2,2,3)
+grpdelay(hp, 1)
+title('Passa-Banda')
+
+subplot(2,2,4)
+grpdelay(hr, 1) 
+title('Rejeita-Banda')
+grid on
+
+
+% Diagrama de Polos e Zeros
+
+figure(5)
+
+subplot(2,2,1)
+zplane(hb, 1) 
+title('Passa-Baixas')
+
+subplot(2,2,2)
+zplane(ha, 1) 
+title('Passa-Altas')
+
+subplot(2,2,3)
+zplane(hp, 1) 
+title('Passa-Banda')
+
+subplot(2,2,4)
+zplane(hr, 1) 
+title('Rejeita-Banda') 
+grid on
+
