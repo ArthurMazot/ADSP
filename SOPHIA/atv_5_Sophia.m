@@ -388,4 +388,6 @@ grid on
 %%TODO
 %validar Amax e a min
 %pegar uma amostra em determinada frequencia para validar atenuações
+%componente freq de um audio
+%y potencia x freq
 
