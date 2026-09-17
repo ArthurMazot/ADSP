@@ -2,6 +2,8 @@ clc;
 clear;
 close all;
 
+format long g
+
 [x, fa] = audioread('AURORA - Running With The Wolves.wav');
 
 %{
@@ -103,14 +105,17 @@ hb = tf(NUMb, DENb, -1, 'variable','z^-1');
 %Gráfico de módulo e fase
 figure(3)
 freqz(NUMb,DENb);
+title('Gráfico de módulo e fase - Passas-baixa')
 
 %Atraso de Grupo
 figure(4)
 grpdelay(NUMb,DENb)
+title('Atraso de Grupo - Passas-baixa')
 
 %Polos e zeros
 figure(5)
 zplane(NUMb,DENb)
+title('Polos e zeros - Passas-baixa')
 
 %Plotar Resposta em Frequencia da H(z) obtida pela Transformação Bilinear
 w = 0:pi/10000:pi; % Poucos pontos 512, necessário aumentar
@@ -162,14 +167,17 @@ ha = tf(NUMa,DENa,-1,'variable','z^-1');
 %Gráfico de módulo e fase
 figure
 freqz(NUMa,DENa)
+title('Gráfico de módulo e fase - Passas-altas')
 
 %Atraso de Grupo
 figure
 grpdelay(NUMa,DENa)
+title('Atraso de Grupo - Passas-altas')
 
 %Polos e zeros
 figure
 zplane(NUMa,DENa)
+title('Polos e zeros - Passas-altas')
 
 %Plotar Resposta em Frequencia da H(z)
 w = 0:pi/10000:pi;
@@ -222,17 +230,23 @@ Wao = sqrt(Wap(1)*Wap(2));
 w = 0:pi/10000:pi;
 H = freqz(NUMp,DENp,w);
 
+% Determina H(z)
+hp = tf(NUMp, DENp, -1, 'variable','z^-1');
+
 %Plotar módulo e fase
 figure
 freqz(NUMp,DENp)
+title('Gráfico de módulo e fase - Passas-Banda')
 
 %Plotar atraso de grupo
 figure
 grpdelay(NUMp,DENp)
+title('Atraso de Grupo - Passas-Banda')
 
 %polos e zeros
 figure
 zplane(NUMp,DENp)
+title('Polos e zeros - Passas-Banda')
 
 %Verificar Requisitos 
 var = (pi/10000);
@@ -285,6 +299,9 @@ Wao = sqrt(Wap(1)*Wap(2));
 %Transformaçao Bilinear
 [NUMr,DENr] = bilinear(bt3,at3,fa);
 
+% Determina H(z)
+hr = tf(NUMr, DENr, -1, 'variable','z^-1');
+
 %Plotar Resposta em Frequencia
 w = 0:pi/10000:pi;
 H = freqz(NUMr,DENr,w);
@@ -292,17 +309,19 @@ H = freqz(NUMr,DENr,w);
 %Plotar módulo e fase
 figure
 freqz(NUMr,DENr)
+title('Gráfico de módulo e fase - Rejeita-Banda')
 
 %Plotar atraso de grupo
 figure
 grpdelay(NUMr,DENr)
+title('Atraso de Grupo - Rejeita-Banda')
 
 %polos e zeros
 figure
 zplane(NUMr,DENr)
+title('Polos e zeros - Rejeita-Banda')
 
 %Verificar Requisitos 
-
 var = (pi/10000);
 var1 = ceil(wp(1)/var+1);
 var2 = ceil(wp(2)/var+1);
@@ -348,3 +367,25 @@ G4 = 0;
 yt = G1*y1 + G2*y2 + G3*y3 + G4*y4;
 
 %sound(yt,fa)
+figure
+subplot(2,2,1)
+grpdelay(hb, 1) 
+title('Passa-Baixas')
+
+subplot(2,2,2)
+grpdelay(ha, 1)
+title('Passa-Altas')
+
+subplot(2,2,3)
+grpdelay(hp, 1)
+title('Passa-Banda')
+
+subplot(2,2,4)
+grpdelay(hr, 1) 
+title('Rejeita-Banda')
+grid on
+
+%%TODO
+%validar Amax e a min
+%pegar uma amostra em determinada frequencia para validar atenuações
+
