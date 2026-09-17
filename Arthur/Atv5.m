@@ -2,122 +2,257 @@ clc
 clear all
 close all
 
+format long g
+
 Amax = 0.5;
 Amin = 40;
+Fs = 22050;
 
-E = sqrt(10^(0.1*Amax)-1);
-w = 0:pi/100000:pi;
+w = 0:pi/10000:pi;
+var = pi/10000;
+%% Passa-Baixas
 
-[x, fa] = audioread('Bagatelle-no.-25-__F¸r-Elise___-WoO-59.wav');
+wp = 2*pi*200;
+wr = 2*pi*400;
 
-%% Projeto dos filros
-%Passa-baixas
+Wp1 = wp;
+Wr1 = wr;
 
-Wp = 2*pi*200/fa;
-Ws = 2*pi*400/fa;
+wp = Wp1/Fs;
+wr = Wr1/Fs;
 
-Wpb = 2*fa*tan(Wp/2);
-Wsb = 2*fa*tan(Ws/2);
+%Pr√©-distor√ß√£o das frequ√™ncias
+Wap = 2*Fs*tan(wp/2);
+War = 2*Fs*tan(wr/2);
 
-[n, wo] = cheb1ord(Wpb, Wsb, Amax, Amin, 's');
+%Calculo da ordem do Filtro
+[n,~]=cheb1ord(Wap,War,Amax,Amin,'s');
+wo = Wap;
 
-[z,p,k]=cheb1ap(n, Amax);
-b = poly(z)*k;
-a = poly(p);
-
-%TransformaÁao do filtro
-[b,a]=lp2lp(b,a,wo);
-
-%TransformaÁao Bilinear
-[NUM,DEN] = bilinear(b,a,fa);
-H = freqz(NUM,DEN,w);
-
-%VericaÁ„o
-var = (pi/100000);
-var1 = ceil(Wp/var+1);
-var2 = ceil(Ws/var+1);
-mod_0 = 20*log10(abs(H(1)));
-mod_wp = 20*log10(abs(H(var1)));
-mod_wr = 20*log10(abs(H(var2)));
-
-fprintf('ValidaÁ„o do Passa-Baixas\nmod_0 = %f\nmod_wp = %f\nmod_wr = %f\n\n', mod_0, mod_wp, mod_wr)
-
-%Passa-Altas
-Ws = 1700*pi*2/fa;
-Wp = 1900*pi*2/fa;
-
-Wsa = 2*fa*tan(Ws/2);
-Wpa = 2*fa*tan(Wp/2);
-
-% C·lculo da Ordem e da frequÍncia de 3 dB
-[n, wo] = cheb1ord(Wpa,Wsa,Amax,Amin,'s');
-
-% Determina numerador e denominador da H(s) do filtro analÛgico
+%Determina√ßao do filtro normalizado
 [z,p,k]=cheb1ap(n,Amax);
 b = poly(z)*k;
 a = poly(p);
 
-%TransformaÁao do filtro
-[b,a]=lp2hp(b,a,wo);
+%Transforma√ßao do filtro
+[bt,at]=lp2lp(b,a,wo);
 
-%TransformaÁao Bilinear
-[NUM,DEN] = bilinear(b,a,fa);
+%Transforma√ßao Bilinear
+[NUM,DEN] = bilinear(bt,at,Fs);
+
+% Determina H(z)
+hpb = tf(NUM, DEN, -1, 'variable','z^-1');
+
+%Gr√°fico de m√≥dulo e fase
+figure(1)
+freqz(NUM,DEN)
+
+%Atraso de Grupo
+figure(2)
+subplot(1,2,1)
+grpdelay(NUM,DEN)
+
+%Polos e zeros
+subplot(1,2,2)
+zplane(NUM,DEN)
+
+%Plotar Resposta em Frequencia da H(z) obtida pela Transforma√ß√£o Bilinear
+H = freqz(NUM,DEN,w); 
+ 
+%Verificar Requisitos 
+var1 = ceil(wp/var+1); 
+var2 = ceil(wr/var+1);  
+
+mod_0 = 20*log10(abs(H(1)));
+mod_wp = 20*log10(abs(H(var1))); 
+mod_wr = 20*log10(abs(H(var2)));
+
+fprintf('Valida√ß√£o do Passa-Baixas\nmod_0 = %f\nmod_wp = %f\nmod_wr = %f\n\n', mod_0, mod_wp, mod_wr)
+%% Passa-Altas
+
+%Frequ√™ncias anal√≥gicas de passagem e rejei√ß√£o em rad/s
+wr = 1700*pi*2;
+wp = 1900*pi*2;
+
+Wp1 = wp;
+Wr1 = wr;
+
+wp = Wp1/Fs;
+wr = Wr1/Fs;
+
+%Pr√©-distor√ß√£o das frequ√™ncias
+Wap = 2*Fs*tan(wp/2);
+War = 2*Fs*tan(wr/2);
+
+%Calculo da ordem do Filtro
+[n,~]=cheb1ord(Wap,War,Amax,Amin,'s');
+wo = Wap;
+
+%Determina√ßao do filtro normalizado
+[z,p,k]=cheb1ap(n,Amax);
+b = poly(z)*k;
+a = poly(p);
+
+%Transforma√ßao do filtro
+[bt1,at1]=lp2hp(b,a,wo);
+
+%Transforma√ßao Bilinear
+[NUM,DEN] = bilinear(bt1,at1,Fs);
+
+% Determina H(z)
+hpa = tf(NUM, DEN, -1, 'variable','z^-1');
+
+%Plotar Resposta em Frequencia da H(z) obtida pela Transforma√ß√£o Bilinear
 H = freqz(NUM,DEN,w);
 
-%VericaÁ„o
-var = (pi/100000);
-var1 = ceil(Wp/var+1);
-var2 = ceil(Ws/var+1);
+%Plotar m√≥dulo e fase
+figure(3)
+freqz(NUM,DEN)
+
+%Plotar atraso de grupo
+figure(4)
+subplot(1,2,1)
+grpdelay(NUM,DEN)
+
+%polos e zeros
+subplot(1,2,2)
+zplane(NUM,DEN)
+
+%Verificar Requisitos
+var1 = ceil(wp/var+1);
+var2 = ceil(wr/var+1);
+
 mod_0 = 20*log10(abs(H(1)));
 mod_wp = 20*log10(abs(H(var1)));
 mod_wr = 20*log10(abs(H(var2)));
 
-fprintf('ValidaÁ„o do Passa-Altas\nmod_0 = %f\nmod_wp = %f\nmod_wr = %f\n\n', mod_0, mod_wp, mod_wr)
+fprintf('Valida√ß√£o do Passa-Altas\nmod_0 = %f\nmod_wp = %f\nmod_wr = %f\n\n', mod_0, mod_wp, mod_wr)
 
-%Passa-Banda   (fpp1*fpp2 = fsp1*fsp2)
-Wp = [600*2*pi/fa 800*2*pi/fa];
-Ws = [400*2*pi/fa 1200*2*pi/fa];
-B = Wp(2) - Wp(1);
+%% Passa-Banda
 
-Wsp = 2*fa*tan(Wp/2);
-Wpp = 2*fa*tan(Ws/2);
+%Frequ√™ncia anal√≥gica em rad/s
+wp = [600*2*pi 800*2*pi];
+wr = [400*2*pi 1200*2*pi];
 
-[n,wo]=buttord(Wpp,Wsp,Amax,Amin,'s');
-E1 = E^(1/n);
-B1 = B/E1;
+%Frequ√™ncias digitais
+Wp1 = wp;
+Wr1 = wr;
 
-[z,p,k]=buttap(n);
+wp = Wp1/Fs;
+wr = Wr1/Fs;
+
+%Pr√©-distor√ß√£o das frequ√™ncias
+Wap = 2*Fs*tan(wp/2);
+War = 2*Fs*tan(wr/2);
+
+%Calculo da ordem do Filtro
+[n,~]=cheb1ord(Wap,War,Amax,Amin,'s');
+
+%Determina√ßao do filtro normalizado
+[z,p,k]=cheb1ap(n,Amax);
 b = poly(z)*k;
 a = poly(p);
 
-%TransformaÁao do filtro
-[b,a]=lp2bp(b,a,wo,B1);
+%Transforma√ßao do filtro
+B1 = Wap(2)-Wap(1);
+Wao = sqrt(Wap(1)*Wap(2));
 
-%TransformaÁao Bilinear
-[NUM,DEN] = bilinear(b,a,fa);
+[bt2,at2]=lp2bp(b,a,Wao,B1);
 
-%VericaÁ„o
-w = 0:pi/512:pi;
+%Transforma√ßao Bilinear
+[NUM,DEN] = bilinear(bt2,at2,Fs);
+
+%Plotar Resposta em Frequencia
 H = freqz(NUM,DEN,w);
-figure(2)
-plot(w,abs(H))
-grid on
 
-fprintf('ValidaÁ„o do Passa-Banda\nmod_0 = %f\nmod_wp = %f\nmod_wr = %f\n\n', mod_0, mod_wp, mod_wr)
+%Plotar m√≥dulo e fase
+figure(5)
+freqz(NUM,DEN)
 
-%Rejeita-Banda (fpr1*fpr2 = fsr1*fsr2)
+%Plotar atraso de grupo
+figure(6)
+subplot(1,2,1)
+grpdelay(NUM,DEN)
 
-fprintf('ValidaÁ„o do Rejeita-Banda\nmod_0 = %f\nmod_wp = %f\nmod_wr = %f\n\n', mod_0, mod_wp, mod_wr)
+%polos e zeros
+subplot(1,2,2)
+zplane(NUM,DEN)
 
-%% Sinal x[n]
-n = pow2(nextpow2(length(x(:,1)))); %Corrige para a prÛxima potencia de 2
+%Verificar Requisitos 
 
-y = fft(x(:,1), n); %FFT de uma das faixas de audio
-f = (0:n-1)*(fa/n);
-p = y.*conj(y)/n;
-p = p./max(p);
+var1 = ceil(wp(1)/var+1);
+var2 = ceil(wp(2)/var+1);
+var3 = ceil(wr(1)/var+1);  
+var4 = ceil(wr(2)/var+1);  
 
-%Plot da m˙sica no domÌnio frequÍncia
-figure(1)
-plot(f(1:floor(n/2)), p(1:floor(n/2)))
-xlabel('FrequÍncia (Hz)')
+mod_0 = 20*log10(abs(H(1)));
+mod_wp1 = 20*log10(abs(H(var1))); 
+mod_wp2 = 20*log10(abs(H(var2)));
+mod_wr1 = 20*log10(abs(H(var3))); 
+mod_wr2 = 20*log10(abs(H(var4)));
+
+fprintf('Valida√ß√£o do Passa-Banda\nmod_0 = %f\nmod_wp1 = %f\nmod_wp2 = %f\nmod_wr1 = %f\nmod_wr2 = %f\n\n', mod_0, mod_wp1, mod_wp2, mod_wr1, mod_wr2)
+%% Rejeita-Banda
+
+%Frequ√™ncia anal√≥gica em rad/s
+wp = [2*pi*200 2*pi*6000];    % [wp1 wp2] ou [w1 w2]
+wr = [2*pi*400 2*pi*1500];     % [ws1 ws2] ou [w3 w4]
+
+%Frequ√™ncias digitais
+Wp1 = wp;
+Wr1 = wr;
+
+wp = Wp1/Fs;
+wr = Wr1/Fs;
+
+%Pr√©-distor√ß√£o das frequ√™ncias
+Wap = 2*Fs*tan(wp/2);
+War = 2*Fs*tan(wr/2);
+
+%Calculo da ordem do Filtro
+[n,wn]=cheb1ord(Wap,War,Amax,Amin,'s');
+
+%Determina√ßao do filtro normalizado
+[z,p,k]=cheb1ap(n,Amax);
+b = poly(z)*k;
+a = poly(p);
+
+%Transforma√ßao do filtro
+B1 = Wap(2)-Wap(1);
+Wao = sqrt(Wap(1)*Wap(2));
+
+[bt3,at3]=lp2bs(b,a,Wao,B1);
+
+%Transforma√ßao Bilinear
+[NUM,DEN] = bilinear(bt3,at3,Fs);
+
+%Plotar Resposta em Frequencia
+H = freqz(NUM,DEN,w);
+
+%Plotar m√≥dulo e fase
+figure(7)
+freqz(NUM,DEN)
+
+%Plotar atraso de grupo
+figure(8)
+subplot(1,2,1)
+grpdelay(NUM,DEN)
+
+%polos e zeros
+subplot(1,2,2)
+zplane(NUM,DEN)
+
+%Verificar Requisitos 
+
+var1 = ceil(wp(1)/var+1);
+var2 = ceil(wp(2)/var+1);
+var3 = ceil(wr(1)/var+1);  
+var4 = ceil(wr(2)/var+1);  
+
+mod_0 = 20*log10(abs(H(1)));
+mod_wp1 = 20*log10(abs(H(var1)));  
+mod_wp2 = 20*log10(abs(H(var2)));
+mod_wr1 = 20*log10(abs(H(var3))); 
+mod_wr2 = 20*log10(abs(H(var4)));
+
+fprintf('Valida√ß√£o do Rejeita-Banda\nmod_0 = %f\nmod_wp1 = %f\nmod_wp2 = %f\nmod_wr1 = %f\nmod_wr2 = %f\n\n', mod_0, mod_wp1, mod_wp2, mod_wr1, mod_wr2)
