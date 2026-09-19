@@ -272,9 +272,10 @@ xlim([0 0.4])
 
 %% Plot de x(t) em frequencia
 n = pow2(nextpow2(length(x(:,1)))); %Corrige para a próxima potencia de 2
-
-y = fft(x(:,1), n); %FFT de uma das faixas de audio
+fftx = fft(x(:,1), n);
 f = (0:n-1)*(Fs/n);
+
+y = fftx; %FFT de uma das faixas de audio
 p = y.*conj(y)/n;
 p = p./max(p);
 
@@ -297,37 +298,73 @@ hold on
 
 %Passa-Baixas
 y = fft(y1, n);
-f = (0:n-1)*(Fs/n);
 p = y.*conj(y)/n;
 p = p./max(p);
 
 plot(f(1:floor(n/2)), p(1:floor(n/2)), 'b')
 
+figure(6)
+subplot(2,2,1)
+hold on
+plot(f(1:floor(n/2)), fftx(1:floor(n/2)), 'b')
+plot(f(1:floor(n/2)), y(1:floor(n/2)), 'r')
+xlim([0 4410])
+title('Passa-Baixa')
+
 %Passa-Altas
 y = fft(y2, n);
-f = (0:n-1)*(Fs/n);
 p = y.*conj(y)/n;
 p = p./max(p);
 
+figure(5)
+hold on
 plot(f(1:floor(n/2)), p(1:floor(n/2)), 'r')
+
+figure(6)
+subplot(2,2,2)
+hold on
+plot(f(1:floor(n/2)), fftx(1:floor(n/2)), 'b')
+plot(f(1:floor(n/2)), y(1:floor(n/2)), 'r')
+xlim([0 4410])
+title('Passa-Alta')
 
 %Passa-Banda
 y = fft(y3, n);
-f = (0:n-1)*(Fs/n);
 p = y.*conj(y)/n;
 p = p./max(p);
 
+figure(5)
+hold on
 plot(f(1:floor(n/2)), p(1:floor(n/2)), 'k')
+
+figure(6)
+subplot(2,2,3)
+hold on
+plot(f(1:floor(n/2)), fftx(1:floor(n/2)), 'b')
+plot(f(1:floor(n/2)), y(1:floor(n/2)), 'r')
+xlim([0 4410])
+title('Passa-Banda')
 
 %Rejeita-Banda
 y = fft(y4, n);
-f = (0:n-1)*(Fs/n);
 p = y.*conj(y)/n;
 p = p./max(p);
 
+figure(5)
+hold on
 plot(f(1:floor(n/2)), p(1:floor(n/2)), 'g')
 xlim([0 4410])
+
+figure(6)
+subplot(2,2,4)
+hold on
+plot(f(1:floor(n/2)), fftx(1:floor(n/2)), 'b')
+plot(f(1:floor(n/2)), y(1:floor(n/2)), 'r')
+xlim([0 4410])
+title('Rejeita-Banda')
 
 %% Sistema
 G = [1 1 1 1];
 yt = G(1)*y1 + G(2)*y2 + G(3)*y3 + G(4)*y4;
+
+%sound(yt)
