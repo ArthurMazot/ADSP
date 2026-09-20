@@ -13,6 +13,8 @@ a) Escolher as frequências dos filtros com base no espectro de frequências do 
 
 n = pow2(nextpow2(length(x(:,1))));
 
+nfft = n;
+
 y = fft(x(:,1) - mean(x(:,1)), n);
 f = (0:n-1)*(fa/n);
 
@@ -357,6 +359,7 @@ y2 = filter(NUMa,DENa,x(:,1)); %Passa-Altas
 y3 = filter(NUMp,DENp,x(:,1)); %Passa-Banda
 y4 = filter(NUMr,DENr,x(:,1)); %Rejeita-Banda
 
+
 %Ganhos dos filtros
 G1 = 1;
 G2 = 0;
@@ -366,28 +369,47 @@ G4 = 0;
 %Sinal de saída
 yt = G1*y1 + G2*y2 + G3*y3 + G4*y4;
 
+%Reproduzir sinal de saída
 %sound(yt,fa)
+
+%Espectro de frequências na saída de cada filtro
+Y = {y1, y2, y3, y4};
+cores = {'b','r','g','k'};
+
 figure
-subplot(2,2,1)
-grpdelay(hb, 1) 
-title('Passa-Baixas')
+hold on
 
-subplot(2,2,2)
-grpdelay(ha, 1)
-title('Passa-Altas')
+for i = 1:4
+    yf = fft(Y{i},nfft);
+    pf = yf.*conj(yf)/nfft;
+    pf = pf./max(pf);
 
-subplot(2,2,3)
-grpdelay(hp, 1)
-title('Passa-Banda')
+    plot(f(1:floor(nfft/2)),pf(1:floor(nfft/2)),cores{i})
+end
 
-subplot(2,2,4)
-grpdelay(hr, 1) 
-title('Rejeita-Banda')
+xlim([0 16000])
+xlabel('Frequência (Hz)')
+ylabel('Magnitude normalizada')
+title('Espectro de frequências na saída dos filtros IIR')
+legend('Passa-Baixas','Passa-Altas','Passa-Banda','Rejeita-Banda')
 grid on
 
-%%TODO
-%validar Amax e a min
-%pegar uma amostra em determinada frequencia para validar atenuações
-%componente freq de um audio
-%y potencia x freq
+%Respostas em frequência dos filtros IIR sobrepostas
+[Hb,w] = freqz(NUMb,DENb,10000);
+[Ha,~] = freqz(NUMa,DENa,10000);
+[Hp,~] = freqz(NUMp,DENp,10000);
+[Hr,~] = freqz(NUMr,DENr,10000);
 
+figure
+hold on
+
+plot(w/pi,20*log10(abs(Hb)),'b')
+plot(w/pi,20*log10(abs(Ha)),'r')
+plot(w/pi,20*log10(abs(Hp)),'g')
+plot(w/pi,20*log10(abs(Hr)),'k')
+
+xlabel('Frequência normalizada (\times\pi rad/amostra)')
+ylabel('Magnitude (dB)')
+title('Respostas em frequência dos filtros IIR')
+legend('Passa-Baixas','Passa-Altas','Passa-Banda','Rejeita-Banda')
+grid on
