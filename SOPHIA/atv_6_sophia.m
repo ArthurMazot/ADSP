@@ -8,7 +8,7 @@ close all;
 
 X1=imread('girl_c.jpg'); 
 
-fig = figure;
+fig = figure(1);
 
 X=rgb2gray(X1); %Transforma imagem para grayscale 
 imagem=double(X)./255; 
@@ -33,7 +33,7 @@ imgfft2 = fftshift(fft2(imagem));   %centraliza(Transformada de Fourier 2D)
 
 espectro = log(1+abs(imgfft2));
 
-fig = figure;
+fig = figure(2);
 colormap(gray(256))
 imagesc(espectro)
 title('Espectro da transformada de Fourier')
@@ -80,8 +80,8 @@ A7 = filter2(h7,imagem);
 h8 = [ 1 -2  1; -2  4 -2; 1 -2  1];
 A8 = filter2(h8,imagem);
 
-%Imagem com cada mascara
-fig = figure;
+% Imagem com cada mascara
+fig = figure(3);
 
 subplot(3,3,1)
 imshow(imagem)
