@@ -80,7 +80,7 @@ A7 = filter2(h7,imagem);
 h8 = [ 1 -2  1; -2  4 -2; 1 -2  1];
 A8 = filter2(h8,imagem);
 
-%Imagem com todos os filtros
+%Imagem com cada mascara
 fig = figure;
 
 subplot(3,3,1)
