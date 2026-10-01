@@ -21,18 +21,18 @@ title('Imagem preto e branco');
 truesize(fig);
 
 %{
-2. Calcular a DCT 2D da imagem utilizando a função dct2 do MATLAB.
+2. Calcular a DCT 2D da imagem utilizando a funï¿½ï¿½o dct2 do MATLAB.
 %}
 
 imagt=dct2(imag);
 
 figure();
 colormap(gray(256)),imagesc(log(abs(imagt))),colorbar
-title('Imagem após DCT2');
+title('Imagem apï¿½s DCT2');
 
 %{
-3. Exibir o espectro de magnitude da DCT usando escala logarítmica
-(log(1+|DCT|) ou log(|DCT|)) em uma janela gráfica com mapa de cores em
+3. Exibir o espectro de magnitude da DCT usando escala logarï¿½tmica
+(log(1+|DCT|) ou log(|DCT|)) em uma janela grï¿½fica com mapa de cores em
 tons de cinza e barra de cores (colorbar).
 %}
 
@@ -46,6 +46,5 @@ iimagrt=idct2(imagrt);
 figure(3);
 imshow(iimagrt,256);
 truesize;
-
 
 
