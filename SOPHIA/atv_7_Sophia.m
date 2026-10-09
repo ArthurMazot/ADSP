@@ -2,81 +2,71 @@ clear;
 close all;
 
 %{
-1. Ler a imagem e convertê-la para tons de cinza (se necessário) e double
+1. Carregar uma imagem de tamanho 256x256 e 
+converter para escala de cinza(0 a 255).
 %}
 
-I = imread('lena_c.jpg'); 
+X1=imread('lena_c.jpg'); 
+
+X=rgb2gray(X1); %Transforma imagem para grayscale 
+imag=double(X)./255; 
 
 fig = figure(1);
-subplot(2, 1, 1);
-imshow(I); 
+subplot(1, 2, 1);
+imshow(X1); 
 title('Imagem original');
 
-if size(I, 3) == 3
-    IrgbG = rgb2gray(I);
-end
-Idouble = im2double(IrgbG); % A DCT exige dados do tipo double ou single
-
-subplot(2, 1, 2);
+subplot(1, 2, 2);
 colormap(gray(256)); 
-imshow(Idouble);
+imshow(imag);
 title('Imagem preto e branco');
-
 truesize(fig);
-%{
-2. Definir o tamanho do bloco (8x8)
-%}
-tamanho_bloco = [32 32];
 
 %{
-3. Criar a função anônima que aplica a dct2 em cada bloco
-O parâmetro 'b' representa uma estrutura que contém os dados do bloco em 'b.data'
+2. Calcular a DCT 2D da imagem utilizando a função dct2 do MATLAB.
 %}
 
-funcao_dct = @(b) dct2(b.data);
+imagt=dct2(imag);
 
 %{
-4. Processar a imagem inteira bloco por bloco
+3. Exibir o espectro de magnitude da DCT usando escala logarítmica
+(log(1+|DCT|) ou log(|DCT|)) em uma janela gráfica com mapa de cores em
+tons de cinza e barra de cores (colorbar).
 %}
 
-imagem_dct = blockproc(Idouble, tamanho_bloco, funcao_dct);
+figure(2);
+colormap(gray(256));
+imagesc(log(1+abs(imagt)));
+colorbar;
+title('Imagem após DCT2');
 
-fig = figure(2);
+%{
+5. Desenvolver uma função em MATLAB que construa a matriz de máscara A de
+dimensão 256x256 para um determinado valor j.
 
-subplot(2, 2, 1);
-imshow(log(abs(imagem_dct) + 1), []);
-title('Coeficientes DCT por Blocos');
+6. Utilizar as funções zeros, ones, triu e fliplr.
 
-funcao_idct = @(b) idct2(b.data);
-imagem_idct = blockproc(imagem_dct,tamanho_bloco,funcao_idct);
+7. Filtrar os coeficientes da DCT com a máscara zonal para diferentes
+valores de j e reconstruir a imagem usando a IDCT 2D.
+%}
 
-subplot(2, 2, 2);
-imshow(imagem_idct);
-title('Resultado da inversa');
+valores=[1,2,4,8,16,32,64,128];
 
-for i = 1:256
-    for j = 1:256
-       % if rem(i-1,8) == 0
-        if imagem_dct(i,j) < 2
-            imagem_dct(i,j) = 0;
-        end
-    end
+fig = figure(3);
+
+for i=1:length(valores)
+
+    j=valores(i);
+
+    A=zeros(256);
+    A(1:j,1:j)=fliplr(triu(ones(j)));
+
+    imagrt=imagt.*A;
+    iimagrt=idct2(imagrt);
+
+    subplot(2,4,i);
+    imshow(iimagrt,[]);
+    title(['Imagem reconstruída para j = ',num2str(j)]);
 end
 
-%{
-5. Visualizar o resultado aplicando o log para realçar os coeficientes
-%}
-
-subplot(2, 2, 3);
-imshow(log(abs(imagem_dct) + 1), []);
-title('Coeficientes DCT por Blocos após for');
-
-funcao_idct = @(b) idct2(b.data);
-imagem_idct = blockproc(imagem_dct,tamanho_bloco,funcao_idct);
-
-subplot(2, 2, 4);
-imshow(imagem_idct);
-title('Resultado da inversa depois for');
-
 truesize(fig);
-
