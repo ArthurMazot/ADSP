@@ -34,7 +34,8 @@ colorbar;
 %% Mascaramento
 
 valores = [1, 2, 4, 8, 16, 32, 64, 128];
-
+figure(2)
+hold on
 for i = 1:8
     %5 e 6)
     j = valores(i);
@@ -43,14 +44,14 @@ for i = 1:8
     
     %7)
     imagrt=imagDCT.*A;
+
     iimagrt=idct2(imagrt);
-    figure(1+i);
+    subplot(2, 4, i);
     imshow(iimagrt);
-    truesize;
+    %truesize;
     
     % 8) Apartir de j = 64 ou j = 128 dependendo da imagem. A porcentagem
     % do coeficientes se da por j*(j+1)/131.0720
     coeficiente = j*(j+1)/131072;
     fprintf('J = %d: %f%%\n', j, coeficiente*100)
 end
-
