@@ -2,53 +2,56 @@ clc
 clear all
 close all
 
-%% Imagens
-
-imag1 = imread('girl_c.jpg');
+%% Carrega imagens
+imag1 = imread('girl_c.jpg'); 
 imag2 = imread('house_c.jpg');
 imag3 = imread('lena_c.jpg');
+        
+imag = imag3; %Troca de imagem
 
-I = imag2;
+%% Imagem
+%1)
+imag=rgb2gray(imag); %Transforma imagem para grayscale
+imag=double(imag)./255;
+colormap(gray(256));
 
-%% Script
-% 1. Ler a imagem e convertê-la para tons de cinza (se necessário) e double 
-if size(I, 3) == 3
-    I = rgb2gray(I);
-end
-I = im2double(I); % A DCT exige dados do tipo double ou single
+%% DCT
 
-% 2. Definir o tamanho do bloco (8x8)
-tamanho_bloco = [16 16];
+%2)
+imagDCT = dct2(imag);
 
-% 3. Criar a função anônima que aplica a dct2 em cada bloco
-% O parâmetro 'b' representa uma estrutura que contém os dados do bloco em 'b.data'
-funcao_dct = @(b) dct2(b.data);
-
-% 4. Processar a imagem inteira bloco por bloco
-imagem_dct = blockproc(I, tamanho_bloco, funcao_dct);
-
-for i = 1:256
-   for j = 1:256
-       if imagem_dct(i, j) > 10
-           imagem_dct(i, j) = 0;
-       end
-   end
-end
-
-
-% 5. Visualizar o resultado aplicando o log para realçar os coeficientes
+%3)
 figure(1)
-subplot(1, 3, 1)
-imshow(log(abs(imagem_dct) + 1), []);
-title('Coeficientes DCT por Blocos');
+colormap(gray(256));
+imagesc(log(abs(imagDCT)));
+colormap(jet);
+colorbar;
 
-funcao_idct = @(b) idct2(b.data);
-imagem_idct = blockproc(imagem_dct, tamanho_bloco, funcao_idct);
+%4) As partes de maior amplitude (Mais claras no grafico), ficam
+%principalmente no canto superior esquerdo. Que é a região que possui mais
+%informação da imagem
 
-subplot(1, 3, 2)
-imshow(imagem_idct)
-title('IDCT sem os coeficientes maoires que 10')
+%% Mascaramento
 
-subplot(1, 3, 3)
-imshow(I)
-title('Imagem original')
+valores = [1, 2, 4, 8, 16, 32, 64, 128];
+figure(2)
+hold on
+for i = 1:8
+    %5 e 6)
+    j = valores(i);
+    A=zeros(256);
+    A(1:j,1:j)=fliplr(triu(ones(j)));
+    
+    %7)
+    imagrt=imagDCT.*A;
+
+    iimagrt=idct2(imagrt);
+    subplot(2, 4, i);
+    imshow(iimagrt);
+    %truesize;
+    
+    % 8) Apartir de j = 64 ou j = 128 dependendo da imagem. A porcentagem
+    % do coeficientes se da por j*(j+1)/131.0720
+    coeficiente = j*(j+1)/131072;
+    fprintf('J = %d: %f%%\n', j, coeficiente*100)
+end
