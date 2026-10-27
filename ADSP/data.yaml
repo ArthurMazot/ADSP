@@ -1,0 +1,5 @@
+train: C:\Users\a.mazot\Documents\PlatformIO\Projects\ADSP\imagensTreino\
+val: C:\Users\a.mazot\Documents\PlatformIO\Projects\ADSP\imagensValidacao\
+
+nc: 11  # número de classes
+names: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.']  # nomes das classes
