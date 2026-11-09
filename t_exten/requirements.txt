@@ -1,6 +1,17 @@
-# requirements.txt — 64-bit Python 3.10 or 3.11
-# Windows only (o script usa cv2.CAP_DSHOW)
+# requirements.txt — Python 3.11 ou mais novo, 64 bits (o venv usa 3.11.9; numpy 2.3 exige 3.11+)
+# Windows: os scripts abrem a webcam com cv2.CAP_DSHOW (DirectShow)
+#
+# Instalar:  python -m pip install -r requirements.txt
+#
+# O que cada script usa:
+#   read_display_camera.py     -> opencv-python, inference-sdk (envia o recorte ao Roboflow)
+#   read_display_camera_v2.py  -> opencv-python, numpy, inference-sdk
+#                                 (com --test-image não usa o inference-sdk)
+#   seven_segment_decoder.py   -> opencv-python, numpy (100% local, sem internet)
+#
+# Versões fixadas = as que estão instaladas no venv e foram testadas.
+# Não instale também o opencv-python-headless: ele substitui o cv2 e quebra as janelas (imshow).
+
 opencv-python==4.10.0.84
-inference-sdk
-# python -m pip install -r requirements.txt
-# Antes de rodar (PowerShell): $env:ROBOFLOW_API_KEY = "sua_chave"
+numpy==2.3.5
+inference-sdk==1.8.4

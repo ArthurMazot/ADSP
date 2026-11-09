@@ -43,6 +43,17 @@ def on_mouse(event, x, y, flags, userdata):
         current_point = None
 
 
+def clamp_roi(roi, shape):
+    """Limita o retângulo à imagem (arrastar o mouse para fora da janela dá coordenadas
+    negativas ou maiores que o frame, e o recorte sairia vazio ou errado)."""
+    x, y, w, h = roi
+    x0, y0 = max(0, x), max(0, y)
+    x1, y1 = min(shape[1], x + w), min(shape[0], y + h)
+    if x1 - x0 < 10 or y1 - y0 < 10:
+        return None
+    return x0, y0, x1 - x0, y1 - y0
+
+
 def main():
     global selected_roi
 
@@ -84,7 +95,8 @@ def main():
             cv2.imshow(WINDOW, preview)
             key = cv2.waitKey(1) & 0xFF
 
-            if key == ord("q"):
+            # q ou fechar a janela no "X" (sem isso o loop continuaria e recriaria a janela)
+            if key == ord("q") or cv2.getWindowProperty(WINDOW, cv2.WND_PROP_VISIBLE) < 1:
                 break
 
             if key == ord("r"):
@@ -92,12 +104,13 @@ def main():
                 print("Selection cleared; drag a new box.", flush=True)
 
             if key == ord("p"):
-                if selected_roi is None:
+                roi = clamp_roi(selected_roi, frame.shape) if selected_roi else None
+                if roi is None:
                     print("Select a display area first.", flush=True)
                     continue
 
                 # Send only the selected pixels, not the whole frame.
-                x, y, w, h = selected_roi
+                x, y, w, h = roi
                 crop = frame[y:y + h, x:x + w]
 
                 print("Reading captured display...", flush=True)
