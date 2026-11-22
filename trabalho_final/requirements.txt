@@ -1,0 +1,13 @@
+# requirements.txt — Python 3.11.9 (versão exata; o run.py cria o .venv com ela, baixando se precisar)
+# Windows: a webcam é aberta com cv2.CAP_DSHOW (DirectShow)
+#
+# Instalar (o run.py já faz isso):  python -m pip install -r requirements.txt
+#
+#   multimeter_calibration_api.py  -> opencv-python, numpy, inference-sdk
+#   multimeter_calibration_GUI.py  -> a API acima + tkinter (já vem com o Python; sem pacote extra)
+#
+# Versões fixadas = as testadas.
+
+opencv-python==4.10.0.84
+numpy==2.3.5
+inference-sdk==1.8.4

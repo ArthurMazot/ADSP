@@ -1,0 +1,9 @@
+.venv/
+.uv_tool/
+__pycache__/
+# chave da API (copie config.example.json para config.json e preencha)
+config.json
+# logs e imagens gerados pelas capturas
+logs/
+leituras*.csv
+imagens_*/
